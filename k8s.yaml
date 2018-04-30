@@ -1,0 +1,71 @@
+apiVersion: v1
+items:
+- apiVersion: extensions/v1beta1
+  kind: Deployment
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: '{{ microservice.name }}'
+      hasuraService: custom
+    name: '{{ microservice.name }}'
+    namespace: '{{ cluster.metadata.namespaces.user }}'
+  spec:
+    replicas: 1
+    strategy: {}
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: '{{ microservice.name }}'
+      spec:
+        containers:
+        - image: sidmutha/pg_notify_webhook:v0.1.1
+          imagePullPolicy: IfNotPresent
+          name: '{{ microservice.name }}'
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          env:
+          - name: PGHOST
+            value: "postgres.hasura"
+          - name: PGPORT
+            value: "5432"
+          - name: PGUSER
+            valueFrom:
+              secretKeyRef:
+                name: hasura-secrets
+                key: postgres.user
+          - name: PGPASS
+            valueFrom:
+              secretKeyRef:
+                name: hasura-secrets
+                key: postgres.password
+          - name: DBNAME
+            value: "hasuradb"
+          - name: WEBHOOKURL
+            value: "http://pgwebhook.abash85.hasura-app.io" # replace with your webhook URL
+          resources: {}
+        securityContext: {}
+        terminationGracePeriodSeconds: 0
+  status: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: '{{ microservice.name }}'
+      hasuraService: custom
+    name: '{{ microservice.name }}'
+    namespace: '{{ cluster.metadata.namespaces.user }}'
+  spec:
+    ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: '{{ microservice.name }}'
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+kind: List
+metadata: {}

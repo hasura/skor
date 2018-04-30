@@ -10,14 +10,14 @@
 ## How it works
 A PostgreSQL stored procedure is set up as a trigger on the required table(s). This trigger uses PostgreSQL's LISTEN and NOTIFY to publish change events as JSON to a notification channel. `Skor` watches this channel for messages and when a message is received, it makes an HTTP POST call to the webhook with the JSON payload. The webhook can then decide to take an action on this.
 
-<diagram>
+(diagram)
 
 ## Caveats
 - Events are delivered only once by Postgres. So if `skor` fails for some reason, the events will not be redelivered.
 
 ## Usage
 
-### Set up the trigger
+### Set up the trigger:
 
 Use the `init.sh` script to create the trigger and add it to the tables for which you want to get change events.
 
@@ -42,9 +42,7 @@ $ docker run \
     -it sidmutha/hasura-skor:v0.1.1
 ```
 
-Make sure you use the appropriate database parameters and the webhook URL above.
-
-Currently the program only listens on one channel called `skor`. All events have to be published to this channel. These events are then forwarded to the given webhook url.
+Make sure you use the appropriate database parameters and webhook URL above.
 
 ## Examples
 
@@ -113,3 +111,8 @@ Run the test (present in the root directory) as:
 ```bash
 $ python test.py
 ```
+
+## Contributing
+Contributions are welcome! 
+
+Please look at the [issues](https://github.com/hasura/pg_notify_webhook/issues) page and help us in improving `pg_notify_webhook`!

@@ -1,6 +1,6 @@
 # pg_notify_webhook
 
-`pg_notify_webhook` is a utility for PostgreSQL which calls a webhook with row changes as JSON whenever an INSERT, UPDATE, DELETE event occurs on a particular table. 
+`pg_notify_webhook` is a utility for PostgreSQL which calls a webhook with row changes as JSON whenever an INSERT, UPDATE or DELETE event occurs on a particular table. 
 
 ## Build:
 
@@ -45,7 +45,7 @@ CREATE TRIGGER notify_skor AFTER INSERT OR DELETE OR UPDATE ON <table-name> FOR 
 ### Run the binary:
 
 ```bash
-$ ./build/pg_notify_webhook 'host=localhost port=5432 dbname=postgres user=postgres password=' http://localhost:8080
+$ ./build/skor 'host=localhost port=5432 dbname=postgres user=postgres password=' http://localhost:5000
 ```
 
 Currently the utility only listens on one channel called `skor`. All events have to be published to this channel. These events are forwarded to the given webhook url. The events are *not* redelivered if they fail once.
@@ -60,7 +60,7 @@ Query:
 INSERT INTO test_table(name) VALUES ('abc1');
 ```
 
-JSON output:
+JSON webhook payload:
 
 ```json
 {"data": {"id": 1, "name": "abc1"}, "table": "test_table", "op": "INSERT"}
@@ -73,7 +73,7 @@ Query:
 UPDATE test_table SET name = 'pqr1' WHERE id = 1;
 ```
 
-JSON output:
+JSON webhook payload:
 
 ```json
 {"data": {"id": 1, "name": "pqr1"}, "table": "test_table", "op": "UPDATE"}
@@ -86,7 +86,7 @@ Query:
 DELETE FROM test_table WHERE id = 1;
 ```
 
-JSON output:
+JSON webhook payload:
 
 ```json
 {"data": {"id": 1, "name": "pqr1"}, "table": "test_table", "op": "DELETE"}

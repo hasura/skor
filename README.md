@@ -11,36 +11,11 @@ $ make
 
 ### Set up the trigger
 
-```sql
+Create the trigger and add it to the tables for which you want to get the change events using the init script.
 
-CREATE FUNCTION notify_skor() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-  DECLARE
-    cur_rec record;
-    BEGIN
-      IF (TG_OP = 'DELETE') THEN
-        cur_rec = OLD;
-      ELSE
-        cur_rec = NEW;
-      END IF;
-      PERFORM pg_notify('skor', json_build_object(
-                    'data',  row_to_json(cur_rec),
-                    'table', TG_TABLE_NAME,
-                    'op',    TG_OP
-              )::text);
-      RETURN cur_rec;
-    END;
-$$;
-
+```bash
+$ ./init.sh table1 table2 | psql -h localhost -p 5432 -U postgres -d postgres --
 ```
-
-For each table that you want to get events for, create this trigger;
-
-``` bash
-CREATE TRIGGER notify_skor AFTER INSERT OR DELETE OR UPDATE ON <table-name> FOR EACH ROW EXECUTE PROCEDURE notify_skor();
-```
-
 
 ### Run the binary:
 

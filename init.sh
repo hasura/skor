@@ -25,7 +25,7 @@ echo \
 $$;'
 
 
-# add trigger to input tables
+# drop existing trigger and add trigger to input tables
 for table in "$@"
 do  
     echo "DROP TRIGGER IF EXISTS notify_skor ON $table;"

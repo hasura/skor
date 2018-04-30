@@ -115,4 +115,4 @@ $ python test.py
 ## Contributing
 Contributions are welcome! 
 
-Please look at the [issues](https://github.com/hasura/pg_notify_webhook/issues) page and help us in improving `pg_notify_webhook`!
+Please look at the [issues](https://github.com/hasura/pg_notify_webhook/issues) page and help us in improving `pg-notify-webhook`!

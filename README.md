@@ -2,11 +2,24 @@
 
 `pg_notify_webhook` is a utility for PostgreSQL which calls a webhook with row changes as JSON whenever an INSERT, UPDATE or DELETE event occurs on a particular table. It comprises of a PostgreSQL trigger function and a C binary called `skor` that listens to database notifications and invokes the webhook with a JSON payload.
 
+## When to use
+- When you want to trigger an action in an external application when a table row is modified.
+- When you want a lightweight notification system for changes in the database.
+- When you want to send the changes to a message queue such as AMQP, Kafka etc.
+
+## How it works
+A PostgreSQL stored procedure is set up as a trigger on the required table(s). This trigger uses PostgreSQL's LISTEN and NOTIFY to publish change events as JSON to a notification channel. `Skor` watches this channel for messages and when a message is received, it makes an HTTP POST call to the webhook with the JSON payload. The webhook can then decide to take an action on this.
+
+<diagram>
+
+## Caveats
+- Events are delivered only once by Postgres. So if `skor` fails for some reason, the events will not be redelivered.
+
 ## Usage
 
 ### Set up the trigger
 
-Create the trigger and add it to the tables for which you want to get the change events using the init script.
+Use the `init.sh` script to create the trigger and add it to the tables for which you want to get change events.
 
 ```bash
 $ ./init.sh table1 table2 | psql -h localhost -p 5432 -U postgres -d postgres --
@@ -29,8 +42,9 @@ $ docker run \
     -it sidmutha/hasura-skor:v0.1.1
 ```
 
-Currently the program only listens on one channel called `skor`. All events have to be published to this channel. These events are forwarded to the given webhook url. The events are *not* redelivered if they fail once.
+Make sure you use the appropriate database parameters and the webhook URL above.
 
+Currently the program only listens on one channel called `skor`. All events have to be published to this channel. These events are then forwarded to the given webhook url.
 
 ## Examples
 
@@ -81,7 +95,7 @@ The webhook can be another microservice that exposes an endpoint.
 To learn more on deploying microservices on Hasura you may check out the [documentation](https://docs.hasura.io/0.15/manual/microservices/index.html).
 
 
-## Build:
+## Build Skor:
 
 Run:
 

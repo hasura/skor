@@ -1,20 +1,15 @@
-# skor
+# pg_notify_webhook
 
-Build:
+`pg_notify_webhook` is a utility for PostgreSQL which calls a webhook with row changes as JSON whenever an INSERT, UPDATE, DELETE event occurs on a particular table. 
 
-```bash
-make
-```
-
-Run:
+## Build:
 
 ```bash
-./build/skor 'host=localhost port=7432 dbname=chinook user=admin password=' http://localhost:8080
+$ make
 ```
+## Usage
 
-Currently skor only listens on one channel called `skor`. All events have to be published to this channel. These events are forwarded to the given webhook url. The events are *not* redelivered if they fail once.
-
-## Getting events from table:
+### Set up the trigger
 
 ```sql
 
@@ -40,8 +35,68 @@ $$;
 
 ```
 
-For each table that you want to get events for, you can add this trigger;
+For each table that you want to get events for, create this trigger;
 
 ``` bash
 CREATE TRIGGER notify_skor AFTER INSERT OR DELETE OR UPDATE ON <table-name> FOR EACH ROW EXECUTE PROCEDURE notify_skor();
+```
+
+
+### Run the binary:
+
+```bash
+$ ./build/pg_notify_webhook 'host=localhost port=5432 dbname=postgres user=postgres password=' http://localhost:8080
+```
+
+Currently the utility only listens on one channel called `skor`. All events have to be published to this channel. These events are forwarded to the given webhook url. The events are *not* redelivered if they fail once.
+
+
+## Examples
+
+### INSERT
+
+Query:
+```sql
+INSERT INTO test_table(name) VALUES ('abc1');
+```
+
+JSON output:
+
+```json
+{"data": {"id": 1, "name": "abc1"}, "table": "test_table", "op": "INSERT"}
+```
+
+### UPDATE
+
+Query:
+```sql
+UPDATE test_table SET name = 'pqr1' WHERE id = 1;
+```
+
+JSON output:
+
+```json
+{"data": {"id": 1, "name": "pqr1"}, "table": "test_table", "op": "UPDATE"}
+```
+
+### DELETE
+
+Query:
+```sql
+DELETE FROM test_table WHERE id = 1;
+```
+
+JSON output:
+
+```json
+{"data": {"id": 1, "name": "pqr1"}, "table": "test_table", "op": "DELETE"}
+```
+
+
+## Test
+
+Run the test (present in the root directory):
+
+```bash
+$ python test.py
 ```

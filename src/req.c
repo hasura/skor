@@ -1,20 +1,5 @@
 /**
- * example C code using libcurl and json-c
- * to post and return a payload using
- * http://jsonplaceholder.typicode.com
- *
- * Requirements:
- *
- * libcurl - http://curl.haxx.se/libcurl/c
- *
- * Build:
- *
- * cc curltest.c -lcurl -ljson-c -o curltest
- *
- * Run:
- *
- * ./curltest
- *
+ * Based off https://gist.github.com/leprechau/e6b8fef41a153218e1f4
  */
 
 /* standard includes */

@@ -1,6 +1,6 @@
-# pg_notify_webhook
+# Skor
 
-`pg_notify_webhook` is a utility for PostgreSQL which calls a webhook with row changes as JSON whenever an INSERT, UPDATE or DELETE event occurs on a particular table. It comprises of a PostgreSQL trigger function and a C binary called `skor` that listens to database notifications and invokes the webhook with a JSON payload.
+`skor` is a utility for PostgreSQL which calls a webhook with row changes as JSON whenever an INSERT, UPDATE or DELETE event occurs on a particular table. It comprises of a PostgreSQL trigger function and the C program `skor` that listens to database notifications and invokes the webhook with a JSON payload.
 
 ## When to use
 - When you want to trigger an action in an external application when a table row is modified.
@@ -115,4 +115,4 @@ $ python test.py
 ## Contributing
 Contributions are welcome! 
 
-Please look at the [issues](https://github.com/hasura/pg-notify-webhook/issues) page and help us in improving `pg-notify-webhook`!
+Please look at the [issues](https://github.com/hasura/skor/issues) page and help us in improving `skor`!

@@ -19,7 +19,7 @@ items:
           app: '{{ microservice.name }}'
       spec:
         containers:
-        - image: sidmutha/pg_notify_webhook:v0.1.1
+        - image: sidmutha/hasura-skor:v0.1.1
           imagePullPolicy: IfNotPresent
           name: '{{ microservice.name }}'
           ports:

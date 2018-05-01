@@ -17,7 +17,7 @@ A PostgreSQL stored procedure is set up as a trigger on the required table(s). T
 - Events are only captured when skor is running.
 - If a call to the webhook fails, it is **not** retried.
 
-## Usage
+## Getting started
 
 ### Set up the trigger:
 
@@ -28,7 +28,7 @@ $ ./init.sh table1 table2 | psql -h localhost -p 5432 -U postgres -d postgres --
 ```
 
 ### Run Skor:
-A pre-built Docker image with the `skor` binary is available at `sidmutha/hasura-skor`.
+A pre-built Docker image with the `skor` binary is available at `hasura/skor`.
 
 Run it as:
 
@@ -41,7 +41,7 @@ $ docker run \
     -e PGPORT=5432 \
     -e WEBHOOKURL="http://localhost:5000/"
     --net host \
-    -it sidmutha/hasura-skor:v0.1.1
+    -it hasura/skor:v0.1.1
 ```
 
 Make sure you use the appropriate database parameters and webhook URL above.
@@ -89,7 +89,7 @@ JSON webhook payload:
 
 ## Deploying Skor on Hasura
 
-The pre-built Docker image with the `skor` binary is available at `sidmutha/hasura-skor` and can be deployed as a microservice with the sample `k8s.yaml` in this repo.
+The pre-built Docker image with the `skor` binary is available at `hasura/skor` and can be deployed as a microservice with the sample `k8s.yaml` in this repo.
 The webhook can be another microservice that exposes an endpoint.
 
 To learn more on deploying microservices on Hasura you may check out the [documentation](https://docs.hasura.io/0.15/manual/microservices/index.html).

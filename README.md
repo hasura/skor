@@ -96,7 +96,15 @@ To learn more on deploying microservices on Hasura you may check out the [docume
 
 ## Build Skor:
 
-Run:
+### Requirements:
+
+- PostgreSQL 9+
+- `gcc` 
+- libcurl (`libcurl4-openssl-dev`) 
+- libppq (`libpq-dev`)
+
+
+### Run:
 
 ```bash
 $ make

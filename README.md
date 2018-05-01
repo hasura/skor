@@ -39,7 +39,7 @@ $ docker run \
     -e PGPASS="''" \
     -e PGHOST="localhost" \
     -e PGPORT=5432 \
-    -e WEBHOOKURL="http://localhost:5000/"
+    -e WEBHOOKURL="http://localhost:5000/" \
     --net host \
     -it hasura/skor:v0.1.1
 ```

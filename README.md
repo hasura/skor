@@ -104,12 +104,16 @@ To learn more on deploying microservices on Hasura you may check out the [docume
 - libppq (`libpq-dev`)
 
 
-### Run:
+### Build:
 
 ```bash
 $ make
 ```
+### Run:
 
+```bash
+$ ./build/skor 'host=localhost port=5432 dbname=postgres user=postgres password=' http://localhost:5000
+```
 
 ## Test
 

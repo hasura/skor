@@ -10,7 +10,8 @@
 ## How it works
 A PostgreSQL stored procedure is set up as a trigger on the required table(s). This trigger uses PostgreSQL's LISTEN and NOTIFY to publish change events as JSON to a notification channel. `Skor` watches this channel for messages and when a message is received, it makes an HTTP POST call to the webhook with the JSON payload. The webhook can then decide to take an action on this.
 
-(diagram)
+![Skor Architecture Diagram](skor-arch.png "Skor Architecture")
+
 
 ## Caveats
 - Events are delivered only once by Postgres. So if `skor` fails for some reason, the events will not be redelivered.

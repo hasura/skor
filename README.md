@@ -14,7 +14,8 @@ A PostgreSQL stored procedure is set up as a trigger on the required table(s). T
 
 
 ## Caveats
-- Events are delivered only once by Postgres. So if the HTTP call to the webhook or `skor` itself fails, the events are not redelivered.
+- Events are only captured when skor is running.
+- If a call to the webhook fails, it is **not** retried.
 
 ## Usage
 

@@ -14,7 +14,7 @@ A PostgreSQL stored procedure is set up as a trigger on the required table(s). T
 
 
 ## Caveats
-- Events are delivered only once by Postgres. So if `skor` fails for some reason, the events will not be redelivered.
+- Events are delivered only once by Postgres. So if the HTTP call to the webhook or `skor` itself fails, the events are not redelivered.
 
 ## Usage
 
@@ -105,7 +105,10 @@ $ make
 
 ## Test
 
-The test runs `skor` and a python-flask server for the webhook. Make sure you have installed python-flask before running the test.
+The test runs `skor` and a python-flask server for the webhook. 
+
+Make sure you have installed python-flask and have Postgres running on `localhost:5432` before running the test.
+You can modify the Postgres credentials in the `test.py` file.
 
 Run the test (present in the root directory) as:
 
@@ -116,4 +119,4 @@ $ python test.py
 ## Contributing
 Contributions are welcome! 
 
-Please look at the [issues](https://github.com/hasura/skor/issues) page and help us in improving `skor`!
+Please check out the [contributing guide](CONTRIBUTING.md) to learn about setting up the development environment and building the project. Also look at the [issues](https://github.com/hasura/skor/issues) page and help us in improving Skor!

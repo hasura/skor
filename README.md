@@ -1,6 +1,8 @@
 # Skor
 
-`skor` is a utility for PostgreSQL which calls a webhook with row changes as JSON whenever an INSERT, UPDATE or DELETE event occurs on a particular table. It comprises of a PostgreSQL trigger function and the C program `skor` that listens to database notifications and invokes the webhook with a JSON payload.
+`skor` is a utility for Postgres which calls a webhook with row changes as JSON whenever an INSERT, UPDATE or DELETE event occurs on a particular table. 
+You can drop the docker image next to your Postgres database instance and configure a webhook that will be called whenever 
+It comprises of a PostgcreSQL trigger function and the C program `skor` that listens to database notifications and invokes the webhook with a JSON payload.
 
 ## When to use
 - When you want to trigger an action in an external application when a table row is modified.
@@ -19,18 +21,17 @@ A PostgreSQL stored procedure is set up as a trigger on the required table(s). T
 
 ## Getting started
 
-### Set up the trigger:
+### 1) Set up the trigger:
 
-Use the `init.sh` script to create the trigger and add it to the tables for which you want to get change events.
+Use the `init.sh` script to setup triggers on the tables for which you want change notifications:
 
 ```bash
 $ ./init.sh table1 table2 | psql -h localhost -p 5432 -U postgres -d postgres --
 ```
 
-### Run Skor:
-A pre-built Docker image with the `skor` binary is available at `hasura/skor`.
+### 2) Run Skor:
 
-Run it as:
+Run the skor Docker image (that has the `skor` binary baked in):
 
 ```bash
 $ docker run \

@@ -5,9 +5,9 @@ You can drop the docker image next to your Postgres database instance and config
 It comprises of a PostgcreSQL trigger function and the C program `skor` that listens to database notifications and invokes the webhook with a JSON payload.
 
 ## When to use
-- When you want to trigger an action in an external application when a table row is modified.
-- When you want a lightweight notification system for changes in the database.
-- When you want to send the changes to a message queue such as AMQP, Kafka etc.
++ When you want to trigger an action in an external application when a table row is modified.
++ When you want a lightweight notification system for changes in the database.
++ When you want to send the changes to a message queue such as AMQP, Kafka etc.
 
 ## How it works
 A PostgreSQL stored procedure is set up as a trigger on the required table(s). This trigger uses PostgreSQL's LISTEN and NOTIFY to publish change events as JSON to a notification channel. `Skor` watches this channel for messages and when a message is received, it makes an HTTP POST call to the webhook with the JSON payload. The webhook can then decide to take an action on this.
@@ -16,8 +16,8 @@ A PostgreSQL stored procedure is set up as a trigger on the required table(s). T
 
 
 ## Caveats
-- Events are only captured when skor is running.
-- If a call to the webhook fails, it is **not** retried.
++ Events are only captured when skor is running.
++ If a call to the webhook fails, it is **not** retried.
 
 ## Getting started
 
@@ -100,10 +100,10 @@ To learn more on deploying microservices on Hasura you may check out the [docume
 
 ### Requirements:
 
-- PostgreSQL 9+
-- `gcc` 
-- libcurl (`libcurl4-openssl-dev`) 
-- libppq (`libpq-dev`)
++ PostgreSQL 9+
++ `gcc` 
++ libcurl (`libcurl4-openssl-dev`) 
++ libppq (`libpq-dev`)
 
 
 ### Build:

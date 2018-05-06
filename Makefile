@@ -8,7 +8,7 @@ build_dir    := $(current_dir)/build
 
 skor: src/skor.c src/req.c
 	mkdir -p build
-	gcc $(CPPFLAGS) -O3 -Wall -o build/skor src/skor.c -lpq -lcurl
+	c99 $(CPPFLAGS) -O3 -Wall -Wextra -o build/skor src/skor.c src/log.c -lpq -lcurl
 
 clean:
 	rm -rf build

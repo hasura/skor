@@ -8,6 +8,9 @@
 #include <stdarg.h>
 #include <string.h>
 
+/* the local logging library */
+#include "log.h"
+
 /* libcurl (http://curl.haxx.se/libcurl/c) */
 #include <curl/curl.h>
 
@@ -28,7 +31,7 @@ size_t curl_callback (void *contents, size_t size, size_t nmemb, void *userp) {
     /* check buffer */
     if (p->payload == NULL) {
       /* this isn't good */
-      fprintf(stderr, "ERROR : Failed to expand buffer in curl_callback\n");
+      log_error("failed to expand buffer in curl_callback");
       /* free buffer */
       free(p->payload);
       /* return */
@@ -58,7 +61,7 @@ CURLcode curl_fetch_url(CURL *ch, const char *url, struct curl_fetch_st *fetch) 
     /* check payload */
     if (fetch->payload == NULL) {
         /* log error */
-        fprintf(stderr, "ERROR : Failed to allocate payload in curl_fetch_url\n");
+        log_error("failed to allocate payload in curl_fetch_url");
         /* return error */
         return CURLE_FAILED_INIT;
     }
@@ -94,7 +97,7 @@ CURLcode curl_fetch_url(CURL *ch, const char *url, struct curl_fetch_st *fetch) 
     return rcode;
 }
 
-int call_webhook(char *url, char *j_data, int debug) {
+int call_webhook(char *url, char *j_data) {
     CURL *ch;                                               /* curl handle */
     CURLcode rcode;                                         /* curl result code */
 
@@ -105,7 +108,7 @@ int call_webhook(char *url, char *j_data, int debug) {
     /* init curl handle */
     if ((ch = curl_easy_init()) == NULL) {
         /* log error */
-        fprintf(stderr, "ERROR : Failed to create curl handle in fetch_session\n");
+        log_error("failed to create curl handle in fetch_session");
         /* return error */
         return -1;
     }
@@ -121,6 +124,10 @@ int call_webhook(char *url, char *j_data, int debug) {
     /* fetch page and capture return code */
     rcode = curl_fetch_url(ch, url, cf);
 
+    /* TODO: should be called only when rcode == CURLE_OK */
+    long response_code = 0;
+    curl_easy_getinfo(ch, CURLINFO_RESPONSE_CODE, &response_code);
+
     /* cleanup curl handle */
     curl_easy_cleanup(ch);
 
@@ -130,8 +137,8 @@ int call_webhook(char *url, char *j_data, int debug) {
     /* check return code */
     if (rcode != CURLE_OK) {
         /* log error */
-        fprintf(stderr, "ERROR : Failed to send notification to webhook at %s - curl said: %s\n",
-            url, curl_easy_strerror(rcode));
+        log_error("failed to send notification to webhook at %s - curl said: %s",
+                  url, curl_easy_strerror(rcode));
         /* return error */
         return -2;
     }
@@ -139,15 +146,12 @@ int call_webhook(char *url, char *j_data, int debug) {
     /* check payload */
     if (cf->payload != NULL) {
         /* print result */
-        if (debug)
-            printf("DEBUG : webhook returned: %s\n", cf->payload);
+        log_debug("webhook returned: %ld '%s'", response_code, cf->payload);
         /* free payload */
         free(cf->payload);
     } else {
         /* error */
-        fprintf(stderr, "ERROR: Failed to populate payload");
-        /* free payload */
-        free(cf->payload);
+        log_error("failed to populate payload");
         /* return */
         return -3;
     }

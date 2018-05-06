@@ -137,16 +137,10 @@ $ ./build/skor 'host=localhost port=5432 dbname=postgres user=postgres password=
 
 ## Test
 
-The test runs `skor` and a python-flask server for the webhook.
-
-Make sure you have installed python-flask and have Postgres running on `localhost:5432` before running the test.
-You can modify the Postgres credentials in the `test.py` file.
-
-Run the test (present in the root directory) as:
-
-```bash
-$ python test.py
-```
+1. Install the requirements specified in `tests/requirements.txt`
+2. The tests assume that you have a local postgres instance at `localhost:5432` and a database called `skor_test` which can be accessed by an `admin` user.
+3. Run skor on this database with the webhook url set to `http://localhost:5000`
+4. run `run_tests.sh` script in the `tests` directory.
 
 ## Contributing
 Contributions are welcome!

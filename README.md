@@ -1,6 +1,6 @@
 # Skor
 
-`skor` is a utility for Postgres which calls a webhook with row changes as JSON whenever an INSERT, UPDATE or DELETE event occurs on a particular table. 
+`skor` is a utility for Postgres which calls a webhook with row changes as JSON whenever an INSERT, UPDATE or DELETE event occurs on a particular table.
 You can drop the docker image next to your Postgres database instance and configure a webhook that will be called.
 
 It works using a `pg_notify` trigger function and a tiny C program `skor` that listens to the notifications and calls the configured webhook with a JSON payload.
@@ -13,7 +13,7 @@ It works using a `pg_notify` trigger function and a tiny C program `skor` that l
 ## How it works
 A PostgreSQL stored procedure is set up as a trigger on the required table(s). This trigger uses PostgreSQL's LISTEN and NOTIFY to publish change events as JSON to a notification channel. `Skor` watches this channel for messages and when a message is received, it makes an HTTP POST call to the webhook with the JSON payload. The webhook can then decide to take an action on this.
 
-![Skor Architecture Diagram](skor-arch.png "Skor Architecture")
+![Skor Architecture Diagram](assets/skor-arch.png "Skor Architecture")
 
 
 ## Caveats
@@ -102,8 +102,8 @@ To learn more on deploying microservices on Hasura you may check out the [docume
 ### Requirements:
 
 - PostgreSQL 9+
-- `gcc` 
-- libcurl (`libcurl4-openssl-dev`) 
+- `gcc`
+- libcurl (`libcurl4-openssl-dev`)
 - libppq (`libpq-dev`)
 
 
@@ -120,7 +120,7 @@ $ ./build/skor 'host=localhost port=5432 dbname=postgres user=postgres password=
 
 ## Test
 
-The test runs `skor` and a python-flask server for the webhook. 
+The test runs `skor` and a python-flask server for the webhook.
 
 Make sure you have installed python-flask and have Postgres running on `localhost:5432` before running the test.
 You can modify the Postgres credentials in the `test.py` file.
@@ -132,6 +132,6 @@ $ python test.py
 ```
 
 ## Contributing
-Contributions are welcome! 
+Contributions are welcome!
 
 Please check out the [contributing guide](CONTRIBUTING.md) to learn about setting up the development environment and building the project. Also look at the [issues](https://github.com/hasura/skor/issues) page and help us in improving Skor!

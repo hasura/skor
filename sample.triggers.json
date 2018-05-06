@@ -1,0 +1,21 @@
+[
+    {
+        "table": "tracks"
+    },
+    {
+        "table": "films",
+        "columns": "*"
+    },
+    {
+        "table": "artists",
+        "columns": ["id"]
+    },
+    {
+        "table": "genres",
+        "columns": {
+            "insert": "*",
+            "update": ["id", "name"],
+            "delete": ["id"]
+        }
+    }
+]

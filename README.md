@@ -22,12 +22,14 @@ A PostgreSQL stored procedure is set up as a trigger on the required table(s). T
 
 ## Getting started
 
-### 1) Set up the trigger:
+### 1) Set up the triggers:
 
-Use the `init.sh` script to setup triggers on the tables for which you want change notifications:
+We need to setup triggers on the tables that we we are interested in. Create a `triggers.json` file (see [sample.triggers.json](sample.triggers.json)) with the required tables and events.
+
+Note: This command requires `python3`.
 
 ```bash
-$ ./init.sh table1 table2 | psql -h localhost -p 5432 -U postgres -d postgres --
+$ ./gen-triggers.py triggers.json | psql -h localhost -p 5432 -U postgres -d postgres --single-transaction --
 ```
 
 ### 2) Run Skor:
@@ -87,6 +89,21 @@ JSON webhook payload:
 
 ```json
 {"data": {"id": 1, "name": "pqr1"}, "table": "test_table", "op": "DELETE"}
+```
+
+## Uninstalling
+
+To remove the skor related functions and triggers that were added to Postgres, run this in psql:
+
+```sql
+DO $$DECLARE r record;
+BEGIN
+    FOR r IN SELECT routine_schema, routine_name FROM information_schema.routines
+             WHERE routine_name LIKE 'notify_skor%'
+    LOOP
+        EXECUTE 'DROP FUNCTION ' || quote_ident(r.routine_schema) || '.' || quote_ident(r.routine_name) || ' CASCADE';
+    END LOOP;
+END$$;
 ```
 
 ## Deploying Skor on Hasura

@@ -1,0 +1,21 @@
+[
+    {
+        "table": "skor_test_t1"
+    },
+    {
+        "table": "skor_test_t2",
+        "columns": "*"
+    },
+    {
+        "table": "skor_test_t3",
+        "columns": ["c1"]
+    },
+    {
+        "table": "skor_test_t4",
+        "columns": {
+            "insert": "*",
+            "update": ["c1", "c2"],
+            "delete": ["c1"]
+        }
+    }
+]

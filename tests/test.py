@@ -1,115 +1,182 @@
-import subprocess, os
-import time
+#!/usr/bin/env python3
+
+import socketserver
+import threading
+import http.server
 import json
+import queue
+from http import HTTPStatus
 
-## set up test env
+from sqlalchemy import create_engine
+from sqlalchemy.schema import MetaData
 
-# using psql subprocess to execute sql instead of psycopg2 since it doesn't seem to fire the triggers
-def psql(stmt):
-  s = subprocess.Popen(["psql", "-hlocalhost", "-p5432", "-Upostgres", "-dpostgres", "-c {}".format(stmt)])
-  s.wait()
+respQ = queue.Queue(maxsize=1)
 
+class WebhookHandler(http.server.BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(HTTPStatus.OK)
+        self.end_headers()
+    def do_POST(self):
+        contentLen = self.headers.get('Content-Length')
+        reqBody = self.rfile.read(int(contentLen))
+        reqJson = json.loads(reqBody)
+        self.log_message(json.dumps(reqJson))
+        self.send_response(HTTPStatus.NO_CONTENT)
+        self.end_headers()
+        respQ.put(reqJson)
 
-print("starting webhook server")
+def startWebserver():
+    server_address = ('', 5000)
+    httpd = http.server.HTTPServer(server_address, WebhookHandler)
+    webServer = threading.Thread(target=httpd.serve_forever)
+    webServer.start()
+    return httpd, webServer
 
-# touch serverlog file before server starts 
-# using this method since the Popen stdout doesn't give any output for the server
-open("/tmp/serverlog","w").close()
+def assertEvent(q, resp, timeout=5):
+    evResp = q.get(timeout=timeout)
+    return resp == evResp
 
-# start server
-server = subprocess.Popen(["python", "tests/server.py"], stdout=subprocess.PIPE)
+def t1Insert(meta):
+    t = meta.tables['skor_test_t1']
+    return {
+        "name": "t1: insert",
+        "statement": t.insert().values(c1=1, c2='hello'),
+        "resp": {
+            'table': 'skor_test_t1',
+            'schema': 'public',
+            'op': 'INSERT',
+            'data': {'c1': 1, 'c2': 'hello'}
+        }
+    }
 
-# give time for the server to start
-time.sleep(3)
+def t1Update(meta):
+    t = meta.tables['skor_test_t1']
+    return {
+        "name": "t1: update",
+        "statement": t.update().values(c2='world').where(t.c.c1 == 1),
+        "resp": {
+            'table': 'skor_test_t1',
+            'schema': 'public',
+            'op': "UPDATE",
+            'data': {'c1': 1, 'c2': 'world'}
+        }
+    }
 
-create_function_stmt = """
-CREATE FUNCTION notify_skor() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-  DECLARE
-    cur_rec record;
-    BEGIN
-      IF (TG_OP = 'DELETE') THEN
-        cur_rec = OLD;
-      ELSE
-        cur_rec = NEW;
-      END IF;
-      PERFORM pg_notify('skor', json_build_object(
-                    'data',  row_to_json(cur_rec),
-                    'table', TG_TABLE_NAME,
-                    'op',    TG_OP
-              )::text);
-      RETURN cur_rec;
-    END;
-$$;
-"""
-# create trigger function
-psql(create_function_stmt)
+def t1Delete(meta):
+    t = meta.tables['skor_test_t1']
+    return {
+        "name": "t1: delete",
+        "statement": t.delete().where(t.c.c1 == 1),
+        "resp": {
+            'table': 'skor_test_t1',
+            'schema': 'public',
+            'op': 'DELETE',
+            'data': {'c1': 1, 'c2': 'world'}
+        }
+    }
 
-# create test table
-psql("CREATE TABLE test_table (id serial, name text);")
+def t3Insert(meta):
+    t = meta.tables['skor_test_t3']
+    return {
+        "name": "t3: insert",
+        "statement": t.insert().values(c1=1, c2='hello'),
+        "resp": {
+            'table': 'skor_test_t3',
+            'schema': 'public',
+            'op': 'INSERT',
+            'data': {'c1': 1}
+        }
+    }
 
-# create trigger on test_table
-psql("CREATE TRIGGER notify_skor AFTER INSERT OR DELETE OR UPDATE ON test_table FOR EACH ROW EXECUTE PROCEDURE notify_skor();")
+def t3Update(meta):
+    t = meta.tables['skor_test_t3']
+    return {
+        "name": "t3: update",
+        "statement": t.update().values(c2='world').where(t.c.c1 == 1),
+        "resp": {
+            'table': 'skor_test_t3',
+            'schema': 'public',
+            'op': "UPDATE",
+            'data': {'c1': 1}
+        }
+    }
 
-# start the skor binary
-print("Starting skor")
-skor = subprocess.Popen(["./build/skor", "host=localhost port=5432 dbname=postgres user=postgres password=", "http://localhost:5000"], stdout=subprocess.PIPE)
+def t3Delete(meta):
+    t = meta.tables['skor_test_t3']
+    return {
+        "name": "t3: delete",
+        "statement": t.delete().where(t.c.c1 == 1),
+        "resp": {
+            'table': 'skor_test_t3',
+            'schema': 'public',
+            'op': 'DELETE',
+            'data': {'c1': 1}
+        }
+    }
 
+def t4Insert(meta):
+    t = meta.tables['skor_test_t4']
+    return {
+        "name": "t4: insert",
+        "statement": t.insert().values(c1=1, c2='hello', c3='world'),
+        "resp": {
+            'table': 'skor_test_t4',
+            'schema': 'public',
+            'op': 'INSERT',
+            'data': {'c1': 1, 'c2': 'hello', 'c3': 'world'}
+        }
+    }
 
-## set up complete
+def t4Update(meta):
+    t = meta.tables['skor_test_t4']
+    return {
+        "name": "t4: update",
+        "statement": t.update().values(c2='ahoy').where(t.c.c1 == 1),
+        "resp": {
+            'table': 'skor_test_t4',
+            'schema': 'public',
+            'op': "UPDATE",
+            'data': {'c1': 1, 'c2': 'ahoy'}
+        }
+    }
 
-## begin testing
-print("Begin testing")
+def t4Delete(meta):
+    t = meta.tables['skor_test_t4']
+    return {
+        "name": "t4: delete",
+        "statement": t.delete().where(t.c.c1 == 1),
+        "resp": {
+            'table': 'skor_test_t4',
+            'schema': 'public',
+            'op': 'DELETE',
+            'data': {'c1': 1}
+        }
+    }
 
-expected_jsons = {
-    'INSERT' : {'data': {'id': 1, 'name': 'abc1'}, 'op': 'INSERT', 'table': 'test_table'},
-    'UPDATE' : {'data': {'id': 1, 'name': 'pqr1'}, 'op': 'UPDATE', 'table': 'test_table'},
-    'DELETE' : {'data': {'id': 1, 'name': 'pqr1'}, 'op': 'DELETE', 'table': 'test_table'}
-}
+tests = [ t1Insert, t1Update, t1Delete
+        , t3Insert, t3Update, t3Delete
+        , t4Insert, t4Update, t4Delete
+        ]
 
-f = open("/tmp/serverlog", "r")
+httpd, webServer = startWebserver()
 
-# function to verify outputs
-def verify(op):
-  line = None
-  while not line:
-    line = f.readline()
-    
-  print(line)
-  
-  # verify op
-  expected = expected_jsons[op]
+engine = create_engine('postgresql://admin@localhost:5432/skor_test')
+meta = MetaData()
+meta.reflect(bind=engine)
 
-  out = json.loads(str(line))
-  if expected == out:
-      print("{} passed".format(op))
-  else:
-      print("{} failed".format(op))
+conn = engine.connect()
 
+for t in tests:
+    testParams = t(meta)
+    print("-" * 20)
+    print("Running Test: {}".format(testParams['name']))
+    stmt = testParams['statement']
+    conn.execute(stmt)
+    print(stmt)
+    resp = testParams['resp']
+    success = assertEvent(respQ, resp)
+    res = "Succeeded" if success else "Failed"
+    print("Test result: {}".format(res))
 
-# Insert
-psql("INSERT INTO test_table(name) VALUES ('abc1');")
-verify('INSERT')
-
-# Update
-psql("UPDATE test_table SET name = 'pqr1' WHERE id = 1")
-verify('UPDATE')
-
-# Delete
-psql("DELETE FROM test_table WHERE id = 1")
-verify('DELETE')
-
-# time.sleep(3)
-
-
-
-## teardown
-
-print("Teardown test env")
-f.close()
-psql("DROP TABLE test_table;")
-psql("DROP FUNCTION notify_skor;")
-skor.terminate()
-server.terminate()
-os.remove("/tmp/serverlog")
+httpd.shutdown()
+webServer.join()

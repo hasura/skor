@@ -128,7 +128,7 @@ int call_webhook(char *url, char *j_data, int debug) {
     curl_slist_free_all(headers);
 
     /* check return code */
-    if (rcode != CURLE_OK || cf->size < 1) {
+    if (rcode != CURLE_OK) {
         /* log error */
         fprintf(stderr, "ERROR : Failed to send notification to webhook at %s - curl said: %s\n",
             url, curl_easy_strerror(rcode));

@@ -37,14 +37,14 @@ $ ./gen-triggers.py triggers.json | psql -h localhost -p 5432 -U postgres -d pos
 Run the skor Docker image (that has the `skor` binary baked in):
 
 ```bash
-$ docker run \
-    -e DBNAME="postgres" \
-    -e PGUSER="postgres" \
-    -e PGPASS="''" \
-    -e PGHOST="localhost" \
-    -e PGPORT=5432 \
-    -e WEBHOOKURL="http://localhost:5000/" \
-    --net host \
+$ docker run
+    e DBNAME="postgres" 
+    e PGUSER="postgres" 
+    e PGPASS="''" 
+    e PGHOST="localhost" 
+    e PGPORT=5432 
+    e WEBHOOKURL="http://localhost:5000/" 
+    -net host 
     -it hasura/skor:v0.1.1
 ```
 

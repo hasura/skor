@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-
-import socketserver
+import os
 import threading
 import http.server
 import json
@@ -12,10 +11,13 @@ from sqlalchemy.schema import MetaData
 
 respQ = queue.Queue(maxsize=1)
 
+
 class WebhookHandler(http.server.BaseHTTPRequestHandler):
+
     def do_GET(self):
         self.send_response(HTTPStatus.OK)
         self.end_headers()
+
     def do_POST(self):
         contentLen = self.headers.get('Content-Length')
         reqBody = self.rfile.read(int(contentLen))
@@ -25,6 +27,7 @@ class WebhookHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
         respQ.put(reqJson)
 
+
 def startWebserver():
     server_address = ('', 5000)
     httpd = http.server.HTTPServer(server_address, WebhookHandler)
@@ -32,9 +35,11 @@ def startWebserver():
     webServer.start()
     return httpd, webServer
 
+
 def assertEvent(q, resp, timeout=5):
     evResp = q.get(timeout=timeout)
     return resp == evResp
+
 
 def t1Insert(meta):
     t = meta.tables['skor_test_t1']
@@ -49,6 +54,7 @@ def t1Insert(meta):
         }
     }
 
+
 def t1Update(meta):
     t = meta.tables['skor_test_t1']
     return {
@@ -61,6 +67,7 @@ def t1Update(meta):
             'data': {'c1': 1, 'c2': 'world'}
         }
     }
+
 
 def t1Delete(meta):
     t = meta.tables['skor_test_t1']
@@ -75,6 +82,7 @@ def t1Delete(meta):
         }
     }
 
+
 def t3Insert(meta):
     t = meta.tables['skor_test_t3']
     return {
@@ -87,6 +95,7 @@ def t3Insert(meta):
             'data': {'c1': 1}
         }
     }
+
 
 def t3Update(meta):
     t = meta.tables['skor_test_t3']
@@ -101,6 +110,7 @@ def t3Update(meta):
         }
     }
 
+
 def t3Delete(meta):
     t = meta.tables['skor_test_t3']
     return {
@@ -113,6 +123,7 @@ def t3Delete(meta):
             'data': {'c1': 1}
         }
     }
+
 
 def t4Insert(meta):
     t = meta.tables['skor_test_t4']
@@ -127,6 +138,7 @@ def t4Insert(meta):
         }
     }
 
+
 def t4Update(meta):
     t = meta.tables['skor_test_t4']
     return {
@@ -139,6 +151,7 @@ def t4Update(meta):
             'data': {'c1': 1, 'c2': 'ahoy'}
         }
     }
+
 
 def t4Delete(meta):
     t = meta.tables['skor_test_t4']
@@ -153,14 +166,23 @@ def t4Delete(meta):
         }
     }
 
-tests = [ t1Insert, t1Update, t1Delete
-        , t3Insert, t3Update, t3Delete
-        , t4Insert, t4Update, t4Delete
-        ]
+
+tests = [
+    t1Insert, t1Update, t1Delete,
+    t3Insert, t3Update, t3Delete,
+    t4Insert, t4Update, t4Delete,
+]
 
 httpd, webServer = startWebserver()
 
-engine = create_engine('postgresql://admin@localhost:5432/skor_test')
+postgres_endpoint = "postgres://%s:%s@%s:%s/skor_test" % (
+    os.environ["PGUSER"],
+    os.environ["PGPASS"],
+    os.environ["PGHOST"],
+    os.environ["PGPORT"],
+)
+
+engine = create_engine(postgres_endpoint)
 meta = MetaData()
 meta.reflect(bind=engine)
 

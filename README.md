@@ -137,10 +137,16 @@ $ ./build/skor 'host=localhost port=5432 dbname=postgres user=postgres password=
 
 ## Test
 
-1. Install the requirements specified in `tests/requirements.txt`
-2. The tests assume that you have a local postgres instance at `localhost:5432` and a database called `skor_test` which can be accessed by an `admin` user.
-3. Run skor on this database with the webhook url set to `http://localhost:5000`
-4. run `run_tests.sh` script in the `tests` directory.
+Steps to execute the tests:
+1. Build `skor` (instructions above :top:), ensure there is a running postgres instance to test against
+2. Define PGUSER, PGPASS, PGHOST and PGPORT env vars
+3. Invoke `run_tests.sh` from the `tests` dir
+
+The `run_tests.sh` script does the following:
+1. Installs the requirements specified in `tests/requirements.txt` (make sure you are in a virtualenv before invoking)
+2. (Re)Creates a database `skor_test` and adds the necessary tables, runs skor etc
+3. Makes schema changes to the tables and makes sure `skor` gets them all right
+4. Tears down `skor`, deletes the `skor_test` database
 
 ## Contributing
 Contributions are welcome!

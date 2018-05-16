@@ -105,11 +105,11 @@ CURLcode curl_fetch_url(CURL *ch, const char *url, struct curl_fetch_st *fetch) 
       }
 
       /* retry after multiples of 100 miliseconds */
-      sleep(100*webhook_trial);
+      sleep(0.1*webhook_trial);
 
       webhook_trial++;
 
-    } while (webhook_trial < WEBHOOK_RETRY);
+    } while (webhook_trial <= WEBHOOK_RETRY);
 
     /* return */
     return rcode;

@@ -11,7 +11,7 @@ It works using a `pg_notify` trigger function and a tiny C program `skor` that l
 - When you want to send the changes to a message queue such as AMQP, Kafka etc.
 
 ## How it works
-A PostgreSQL stored procedure is set up as a trigger on the required table(s). This trigger uses PostgreSQL's LISTEN and NOTIFY to publish change events as JSON to a notification channel. `Skor` watches this channel for messages and when a message is received, it makes an HTTP POST call to the webhook with the JSON payload. The webhook can then decide to take an action on this.
+A PostgreSQL stored procedure is set up as a trigger on the required table(s). This trigger uses PostgreSQL's LISTEN and NOTIFY to publish change events as JSON to a notification channel. `Skor` watches this channel for messages and when a message is received, it makes an HTTP POST call to the webhook with the JSON payload. The webhook can then decide to take an action on this. Webhooks are retried upto 5 times with linear backoff in multiples of 100ms.
 
 ![Skor Architecture Diagram](assets/skor-arch.png "Skor Architecture")
 

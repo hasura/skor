@@ -9,7 +9,7 @@ BEGIN
     FOR r IN SELECT routine_schema, routine_name FROM information_schema.routines
              WHERE routine_name LIKE 'notify_skor%'
     LOOP
-        EXECUTE 'DROP FUNCTION ' || quote_ident(r.routine_schema) || '.' || quote_ident(r.routine_name) || ' CASCADE';
+        EXECUTE 'DROP FUNCTION ' || quote_ident(r.routine_schema) || '.' || quote_ident(r.routine_name) || '() CASCADE';
     END LOOP;
 END$$;
 """

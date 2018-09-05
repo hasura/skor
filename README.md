@@ -1,5 +1,19 @@
 # Skor
 
+## New and improved version of Skor is now part of [Hasura GraphQL Engine](https://github.com/hasura/graphql-engine)
+
+A few months ago, we built the open source [GraphQL Engine](https://github.com/hasura/graphql-engine) that gives you instant GraphQL APIs over any Postgres database. We have added all of Skor's existing features and even more to make it production ready:
+
+ 1) Reliable: We capture every relevant action on the database as an event, even when Hasura is down! The events are delivered to your webhook as soon as possible with an atleast-once guarantee.
+
+2) Scalable: What more, it even scales horizontally. If you are processing millions of events, just add more instances of GraphQL engine.
+
+3) Use with Serverless: If you are using Skor, then avoid the pain of managing your webhook by moving to Serverless infrastructure. Check out these blog posts to get started
+
+**Use [Hasura GraphQL Engine](https://github.com/hasura/graphql-engine) for production use cases** 
+
+---
+
 `skor` is a utility for Postgres which calls a webhook with row changes as JSON whenever an INSERT, UPDATE or DELETE event occurs on a particular table.
 You can drop the docker image next to your Postgres database instance and configure a webhook that will be called.
 

@@ -64,6 +64,8 @@ $ docker run \
 
 Make sure you use the appropriate database parameters and webhook URL above.
 
+If you are looking to install skor on Heroku, check out [Install on Heroku](https://github.com/karthikvt26/skor-heroku) for more info.
+
 ## Examples
 
 ### INSERT

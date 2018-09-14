@@ -25,7 +25,7 @@ It works using a `pg_notify` trigger function and a tiny C program `skor` that l
 - When you want to send the changes to a message queue such as AMQP, Kafka etc.
 
 ## How it works
-A PostgreSQL stored procedure is set up as a trigger on the required table(s). This trigger uses PostgreSQL's LISTEN and NOTIFY to publish change events as JSON to a notification channel. `Skor` watches this channel for messages and when a message is received, it makes an HTTP POST call to the webhook with the JSON payload. The webhook can then decide to take an action on this.
+A PostgreSQL stored procedure is set up as a trigger on the required table(s). This trigger uses PostgreSQL's LISTEN and NOTIFY to publish change events as JSON to a notification channel. `Skor` watches this channel for messages and when a message is received, it makes an HTTP POST call to the webhook with the JSON payload. The webhook can then decide to take an action on this. Webhooks are retried upto 5 times with linear backoff in multiples of 100ms.
 
 ![Skor Architecture Diagram](assets/skor-arch.png "Skor Architecture")
 
@@ -151,10 +151,16 @@ $ ./build/skor 'host=localhost port=5432 dbname=postgres user=postgres password=
 
 ## Test
 
-1. Install the requirements specified in `tests/requirements.txt`
-2. The tests assume that you have a local postgres instance at `localhost:5432` and a database called `skor_test` which can be accessed by an `admin` user.
-3. Run skor on this database with the webhook url set to `http://localhost:5000`
-4. run `run_tests.sh` script in the `tests` directory.
+Steps to execute the tests:
+1. Build `skor` (instructions above :top:), ensure there is a running postgres instance to test against
+2. Define PGUSER, PGPASS, PGHOST and PGPORT env vars
+3. Invoke `run_tests.sh` from the `tests` dir
+
+The `run_tests.sh` script does the following:
+1. Installs the requirements specified in `tests/requirements.txt` (make sure you are in a virtualenv before invoking)
+2. (Re)Creates a database `skor_test` and adds the necessary tables, runs skor etc
+3. Makes schema changes to the tables and makes sure `skor` gets them all right
+4. Tears down `skor`, deletes the `skor_test` database
 
 ## Contributing
 Contributions are welcome!

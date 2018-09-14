@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <unistd.h>
 
 /* the local logging library */
 #include "log.h"
@@ -19,6 +20,8 @@ struct curl_fetch_st {
     char *payload;
     size_t size;
 };
+
+const int WEBHOOK_RETRY = 5;
 
 /* callback for curl fetch */
 size_t curl_callback (void *contents, size_t size, size_t nmemb, void *userp) {
@@ -90,8 +93,23 @@ CURLcode curl_fetch_url(CURL *ch, const char *url, struct curl_fetch_st *fetch) 
     /* set maximum allowed redirects */
     curl_easy_setopt(ch, CURLOPT_MAXREDIRS, 1);
 
-    /* fetch the url */
-    rcode = curl_easy_perform(ch);
+    int webhook_trial = 1;
+    do {
+
+      /* fetch the url */
+      rcode = curl_easy_perform(ch);
+
+      if (rcode == CURLE_OK) {
+        log_debug("webhook call succeeded after %d trial(s)", webhook_trial);
+        break;
+      }
+
+      /* retry after multiples of 100 miliseconds */
+      sleep(0.1*webhook_trial);
+
+      webhook_trial++;
+
+    } while (webhook_trial <= WEBHOOK_RETRY);
 
     /* return */
     return rcode;

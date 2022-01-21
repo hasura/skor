@@ -59,7 +59,7 @@ $ docker run \
     -e PGPORT=5432 \
     -e WEBHOOKURL="http://localhost:5000/" \
     --net host \
-    -it hasura/skor:v0.1.1
+    -it hasura/skor:v0.2.0
 ```
 
 Make sure you use the appropriate database parameters and webhook URL above.
